@@ -1,5 +1,5 @@
-import './style.css'
-import { flashcardsData, quizQuestions } from './data.js'
+import './style.css';
+import { flashcardsData } from './data.js';
 
 const subjectColors = {
   "БЕЗОПАСНОСТЬ ЖИЗНЕДЕЯТЕЛЬНОСТИ": "#ef4444", 
@@ -26,204 +26,162 @@ function getCategoryColor(category) {
   return 'var(--accent)';
 }
 
-// --- Navigation ---
-const navFlashcardsBtn = document.getElementById('nav-flashcards');
-const navQuizBtn = document.getElementById('nav-quiz');
-const viewFlashcards = document.getElementById('view-flashcards');
-const viewQuiz = document.getElementById('view-quiz');
+// Elements
+const categoryNav = document.getElementById('category-nav');
+const questionsList = document.getElementById('questions-list');
+const searchInput = document.getElementById('search-input');
+const currentCategoryTitle = document.getElementById('current-category-title');
+const questionsCount = document.getElementById('questions-count');
+const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+const sidebar = document.getElementById('sidebar');
 
-navFlashcardsBtn.addEventListener('click', () => {
-  navFlashcardsBtn.classList.add('active');
-  navQuizBtn.classList.remove('active');
-  viewFlashcards.classList.add('active');
-  viewQuiz.classList.remove('active');
-});
+// State
+let currentCategory = 'all';
+let searchQuery = '';
 
-navQuizBtn.addEventListener('click', () => {
-  navQuizBtn.classList.add('active');
-  navFlashcardsBtn.classList.remove('active');
-  viewQuiz.classList.add('active');
-  viewFlashcards.classList.remove('active');
-});
+// Get unique categories
+const categories = ['all', ...new Set(flashcardsData.map(c => c.category))];
 
-// --- Flashcards Logic ---
-const flashcard = document.getElementById('flashcard');
-const fcCategory = document.getElementById('fc-category');
-const fcQuestion = document.getElementById('fc-question');
-const fcAnswer = document.getElementById('fc-answer');
-const fcCounter = document.getElementById('fc-counter');
-const fcPrev = document.getElementById('fc-prev');
-const fcNext = document.getElementById('fc-next');
-const fcSubjectSelect = document.getElementById('fc-subject');
+const categoryNames = {
+  'all': 'Все предметы',
+};
 
-let currentCardIndex = 0;
-let currentFlashcards = [...flashcardsData];
+// Render Sidebar
+function renderSidebar() {
+  categoryNav.innerHTML = '';
+  categories.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = `category-btn ${cat === currentCategory ? 'active' : ''}`;
+    btn.textContent = categoryNames[cat] || cat;
+    
+    // Add color accent
+    if (cat !== 'all') {
+      btn.style.borderLeft = `3px solid transparent`;
+      if (cat === currentCategory) {
+        btn.style.borderLeftColor = getCategoryColor(cat);
+        btn.style.boxShadow = `inset 3px 0 0 ${getCategoryColor(cat)}`;
+      }
+    }
 
-fcSubjectSelect.addEventListener('change', (e) => {
-  const subject = e.target.value;
-  if (subject === 'all') {
-    currentFlashcards = [...flashcardsData];
+    btn.addEventListener('click', () => {
+      currentCategory = cat;
+      searchInput.value = ''; // Clear search on category change
+      searchQuery = '';
+      
+      renderSidebar(); // re-render to update active class
+      renderQuestions();
+      
+      // Close mobile sidebar if open
+      if (window.innerWidth <= 768) {
+        sidebar.classList.remove('open');
+      }
+    });
+    categoryNav.appendChild(btn);
+  });
+}
+
+// Filter and Render Questions
+function renderQuestions() {
+  questionsList.innerHTML = '';
+  
+  let filtered = flashcardsData;
+  
+  // Filter by category
+  if (currentCategory !== 'all') {
+    filtered = filtered.filter(q => q.category === currentCategory);
+    currentCategoryTitle.textContent = currentCategory;
   } else {
-    currentFlashcards = flashcardsData.filter(c => c.category.toUpperCase() === subject.toUpperCase());
+    currentCategoryTitle.textContent = 'Все предметы';
   }
-  currentCardIndex = 0;
-  renderFlashcard();
-});
-
-function renderFlashcard() {
-  if (currentFlashcards.length === 0) return;
-  const card = currentFlashcards[currentCardIndex];
-  fcCategory.textContent = card.category;
-  fcQuestion.textContent = card.question;
-  fcAnswer.textContent = card.answer;
-  fcCounter.textContent = `${currentCardIndex + 1} / ${currentFlashcards.length}`;
   
-  const color = getCategoryColor(card.category);
-  fcCategory.style.color = color;
-  flashcard.style.boxShadow = `0 4px 20px 0 ${color}60`; // Colored glow
-  document.querySelector('.card-front').style.borderColor = `${color}40`;
-  document.querySelector('.card-back').style.borderColor = `${color}40`;
-
-  flashcard.classList.remove('is-flipped');
-}
-
-flashcard.addEventListener('click', () => {
-  flashcard.classList.toggle('is-flipped');
-});
-
-fcPrev.addEventListener('click', () => {
-  if (currentCardIndex > 0) {
-    currentCardIndex--;
-    renderFlashcard();
+  // Filter by search query
+  if (searchQuery) {
+    const query = searchQuery.toLowerCase();
+    filtered = filtered.filter(q => 
+      q.question.toLowerCase().includes(query) || 
+      q.answer.toLowerCase().includes(query)
+    );
   }
-});
-
-fcNext.addEventListener('click', () => {
-  if (currentCardIndex < currentFlashcards.length - 1) {
-    currentCardIndex++;
-    renderFlashcard();
-  }
-});
-
-// Initialize flashcards
-if (flashcardsData.length > 0) {
-  renderFlashcard();
-}
-
-// --- Quiz Logic ---
-const startQuizBtn = document.getElementById('start-quiz-btn');
-const restartQuizBtn = document.getElementById('restart-quiz-btn');
-const quizSetup = document.getElementById('quiz-setup');
-const quizActive = document.getElementById('quiz-active');
-const quizResult = document.getElementById('quiz-result');
-
-const quizCounter = document.getElementById('quiz-counter');
-const quizScoreEl = document.getElementById('quiz-score');
-const quizCategory = document.getElementById('quiz-category');
-const quizQuestion = document.getElementById('quiz-question');
-const quizOptions = document.getElementById('quiz-options');
-const finalScoreEl = document.getElementById('final-score');
-const quizSubjectSelect = document.getElementById('quiz-subject');
-
-let currentQuizIndex = 0;
-let quizScore = 0;
-let quizQuestionsMix = [];
-
-function shuffle(array) {
-  let currentIndex = array.length, randomIndex;
-  while (currentIndex > 0) {
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex--;
-    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
-  }
-  return array;
-}
-
-function startQuiz() {
-  const subject = quizSubjectSelect.value;
-  let cards = subject === 'all' ? flashcardsData : flashcardsData.filter(c => c.category.toUpperCase() === subject.toUpperCase());
   
-  if (cards.length < 4) {
-    alert("Для создания теста по этому предмету нужно минимум 4 вопроса в базе!");
+  questionsCount.textContent = `${filtered.length} вопросов`;
+  
+  if (filtered.length === 0) {
+    questionsList.innerHTML = '<p style="color: var(--text-muted); padding: 2rem;">Ничего не найдено по вашему запросу.</p>';
     return;
   }
   
-  // Dynamically generate quiz questions from flashcards
-  const generatedQuiz = cards.map(card => {
-    // Pick 3 random distractors from all flashcards to avoid having too few options in small categories
-    let others = flashcardsData.filter(c => c.answer !== card.answer);
-    others = shuffle(others).slice(0, 3);
+  filtered.forEach((q, index) => {
+    const color = getCategoryColor(q.category);
     
-    const options = [card.answer, ...others.map(o => o.answer)];
-    const shuffledOptions = shuffle([...options]);
-    const correctIndex = shuffledOptions.indexOf(card.answer);
+    const item = document.createElement('div');
+    item.className = 'accordion-item';
     
-    return {
-      category: card.category,
-      question: card.question,
-      options: shuffledOptions,
-      correctAnswer: correctIndex
-    };
-  });
-  
-  quizQuestionsMix = shuffle(generatedQuiz).slice(0, 10); // 10 random questions per test
-  currentQuizIndex = 0;
-  quizScore = 0;
-  
-  quizSetup.classList.add('hidden');
-  quizResult.classList.add('hidden');
-  quizActive.classList.remove('hidden');
-  
-  renderQuizQuestion();
-}
-
-function renderQuizQuestion() {
-  const q = quizQuestionsMix[currentQuizIndex];
-  quizCategory.textContent = q.category;
-  quizQuestion.textContent = q.question;
-  quizCounter.textContent = `Вопрос ${currentQuizIndex + 1} / ${quizQuestionsMix.length}`;
-  quizScoreEl.textContent = `Очки: ${quizScore}`;
-  
-  const color = getCategoryColor(q.category);
-  quizCategory.style.color = color;
-  const container = document.querySelector('.quiz-question-container');
-  container.style.boxShadow = `0 4px 20px 0 ${color}60`;
-  container.style.borderColor = `${color}40`;
-  
-  quizOptions.innerHTML = '';
-  
-  q.options.forEach((opt, index) => {
-    const btn = document.createElement('button');
-    btn.className = 'quiz-option';
-    btn.textContent = opt;
-    btn.addEventListener('click', () => handleQuizAnswer(index, q.correctAnswer, btn));
-    quizOptions.appendChild(btn);
-  });
-}
-
-function handleQuizAnswer(selectedIndex, correctIndex, btnElement) {
-  // Disable all buttons
-  const buttons = quizOptions.querySelectorAll('.quiz-option');
-  buttons.forEach(b => b.disabled = true);
-  
-  if (selectedIndex === correctIndex) {
-    btnElement.classList.add('correct');
-    quizScore++;
-    quizScoreEl.textContent = `Очки: ${quizScore}`;
-  } else {
-    btnElement.classList.add('wrong');
-    buttons[correctIndex].classList.add('correct');
-  }
-  
-  setTimeout(() => {
-    if (currentQuizIndex < quizQuestionsMix.length - 1) {
-      currentQuizIndex++;
-      renderQuizQuestion();
-    } else {
-      showQuizResult();
+    // Header
+    const header = document.createElement('div');
+    header.className = 'accordion-header';
+    
+    const titleWrapper = document.createElement('div');
+    
+    const tag = document.createElement('span');
+    tag.className = 'accordion-category-tag';
+    tag.style.color = color;
+    tag.textContent = q.category;
+    
+    const title = document.createElement('h3');
+    title.className = 'accordion-title';
+    title.textContent = q.question;
+    
+    // Only show tag if 'all' is selected
+    if (currentCategory === 'all') {
+      titleWrapper.appendChild(tag);
     }
-  }, 1500);
+    titleWrapper.appendChild(title);
+    
+    const icon = document.createElement('div');
+    icon.className = 'accordion-icon';
+    icon.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+    
+    header.appendChild(titleWrapper);
+    header.appendChild(icon);
+    
+    // Content
+    const content = document.createElement('div');
+    content.className = 'accordion-content';
+    
+    const inner = document.createElement('div');
+    inner.className = 'accordion-inner';
+    inner.textContent = q.answer;
+    
+    content.appendChild(inner);
+    
+    item.appendChild(header);
+    item.appendChild(content);
+    
+    // Toggle Logic
+    header.addEventListener('click', () => {
+      item.classList.toggle('active');
+      if (item.classList.contains('active')) {
+        item.style.borderColor = color;
+      } else {
+        item.style.borderColor = 'var(--card-border)';
+      }
+    });
+    
+    questionsList.appendChild(item);
+  });
 }
 
-startQuizBtn.addEventListener('click', startQuiz);
-restartQuizBtn.addEventListener('click', startQuiz);
+// Search Listeners
+searchInput.addEventListener('input', (e) => {
+  searchQuery = e.target.value;
+  renderQuestions();
+});
+
+// Mobile menu listener
+mobileMenuBtn.addEventListener('click', () => {
+  sidebar.classList.toggle('open');
+});
+
+// Init
+renderSidebar();
+renderQuestions();
