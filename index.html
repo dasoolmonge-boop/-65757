@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EduPrep - Учебные материалы</title>
+    <link rel="stylesheet" href="./style.css">
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <h1>EduPrep Premium</h1>
+        <nav>
+          <button id="nav-flashcards" class="active">Карточки</button>
+          <button id="nav-quiz">Тесты</button>
+        </nav>
+      </header>
+
+      <main>
+        <!-- Flashcards View -->
+        <section id="view-flashcards" class="view active">
+          <div class="subject-filter">
+             <label for="fc-subject">Предмет:</label>
+             <select id="fc-subject">
+                <option value="all">Все предметы</option>
+                <option value="БЕЗОПАСНОСТЬ ЖИЗНЕДЕЯТЕЛЬНОСТИ">Безопасность жизнедеятельности</option>
+                <option value="БИЗНЕС-ПЛАНИРОВАНИЕ">Бизнес-планирование</option>
+                <option value="МЕНЕДЖМЕНТ">Менеджмент</option>
+                <option value="ЭКОНОМИКА ОРГАНИЗАЦИЙ">Экономика организаций</option>
+                <option value="ОСНОВЫ АЛГОРИТМИЗАЦИИ И ПРОГРАММИРОВАНИЯ">Основы алгоритмизации</option>
+                <option value="АНАЛИЗ И МОДЕЛИРОВАНИЕ БИЗНЕС-ПРОЦЕССОВ">Анализ бизнес-процессов</option>
+                <option value="УПРАВЛЕНИЕ ТРЕБОВАНИЯМИ И ПРОЕКТИРОВАНИЕ ИС">Управление требованиями</option>
+                <option value="УПРАВЛЕНИЕ ИТ-ПРОЕКТАМИ">Управление ИТ-проектами</option>
+                <option value="МЕТОДЫ И СПОСОБЫ АНАЛИЗА ДАННЫХ В БИЗНЕСЕ">Методы анализа данных</option>
+                <option value="ЭФФЕКТИВНОСТЬ ИТ">Эффективность ИТ</option>
+                <option value="ФИЗИЧЕСКАЯ КУЛЬТУРА И СПОРТ">Физкультура и спорт</option>
+                <option value="ПРАВОВЫЕ ОСНОВЫ ПРОТИВОДЕЙСТВИЯ КОРРУПЦИИ">Правовые основы</option>
+                <option value="ТЕОРИЯ СИСТЕМ И СИСТЕМНЫЙ АНАЛИЗ">Теория систем</option>
+             </select>
+          </div>
+          <div class="controls">
+             <span id="fc-counter" class="counter">1 / 10</span>
+             <div class="nav-buttons">
+                <button id="fc-prev">Назад</button>
+                <button id="fc-next">Вперед</button>
+             </div>
+          </div>
+          <div class="flashcard-container">
+            <div class="flashcard" id="flashcard">
+              <div class="card-front">
+                <div class="card-category" id="fc-category">Категория</div>
+                <div class="card-question" id="fc-question">Вопрос?</div>
+                <div class="card-hint">Нажмите, чтобы увидеть ответ</div>
+              </div>
+              <div class="card-back">
+                <div class="card-category">Ответ</div>
+                <div class="card-answer" id="fc-answer">Ответ</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Quiz View -->
+        <section id="view-quiz" class="view">
+           <div class="quiz-setup" id="quiz-setup">
+              <h2>Проверьте свои знания</h2>
+              <div class="subject-filter quiz-filter">
+                 <label for="quiz-subject">Выберите предмет:</label>
+                 <select id="quiz-subject">
+                    <option value="all">Все предметы</option>
+                    <option value="БЕЗОПАСНОСТЬ ЖИЗНЕДЕЯТЕЛЬНОСТИ">Безопасность жизнедеятельности</option>
+                    <option value="БИЗНЕС-ПЛАНИРОВАНИЕ">Бизнес-планирование</option>
+                    <option value="МЕНЕДЖМЕНТ">Менеджмент</option>
+                    <option value="ЭКОНОМИКА ОРГАНИЗАЦИЙ">Экономика организаций</option>
+                    <option value="ОСНОВЫ АЛГОРИТМИЗАЦИИ И ПРОГРАММИРОВАНИЯ">Основы алгоритмизации</option>
+                    <option value="АНАЛИЗ И МОДЕЛИРОВАНИЕ БИЗНЕС-ПРОЦЕССОВ">Анализ бизнес-процессов</option>
+                    <option value="УПРАВЛЕНИЕ ТРЕБОВАНИЯМИ И ПРОЕКТИРОВАНИЕ ИС">Управление требованиями</option>
+                    <option value="УПРАВЛЕНИЕ ИТ-ПРОЕКТАМИ">Управление ИТ-проектами</option>
+                    <option value="МЕТОДЫ И СПОСОБЫ АНАЛИЗА ДАННЫХ В БИЗНЕСЕ">Методы анализа данных</option>
+                    <option value="ЭФФЕКТИВНОСТЬ ИТ">Эффективность ИТ</option>
+                    <option value="ФИЗИЧЕСКАЯ КУЛЬТУРА И СПОРТ">Физкультура и спорт</option>
+                    <option value="ПРАВОВЫЕ ОСНОВЫ ПРОТИВОДЕЙСТВИЯ КОРРУПЦИИ">Правовые основы</option>
+                    <option value="ТЕОРИЯ СИСТЕМ И СИСТЕМНЫЙ АНАЛИЗ">Теория систем</option>
+                 </select>
+              </div>
+              <button id="start-quiz-btn" class="primary-btn">Начать тест</button>
+           </div>
+           
+           <div class="quiz-active hidden" id="quiz-active">
+             <div class="controls">
+               <span id="quiz-counter" class="counter">Вопрос 1 / 10</span>
+               <span id="quiz-score" class="score">Очки: 0</span>
+             </div>
+             <div class="quiz-question-container">
+               <div class="quiz-category" id="quiz-category">Категория</div>
+               <h3 class="quiz-question" id="quiz-question">Вопрос?</h3>
+               <div class="quiz-options" id="quiz-options">
+                 <!-- Options injected here -->
+               </div>
+             </div>
+           </div>
+
+           <div class="quiz-result hidden" id="quiz-result">
+              <h2>Результаты теста</h2>
+              <p class="final-score" id="final-score">Вы набрали 8 из 10</p>
+              <button id="restart-quiz-btn" class="primary-btn">Пройти снова</button>
+           </div>
+        </section>
+      </main>
+      <footer>
+        <p>&copy; 2026 EduPrep. Успешной сдачи экзаменов!</p>
+      </footer>
+    </div>
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>
