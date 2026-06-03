@@ -141,14 +141,32 @@ function shuffle(array) {
 
 function startQuiz() {
   const subject = quizSubjectSelect.value;
-  let filtered = subject === 'all' ? quizQuestions : quizQuestions.filter(q => q.category.toUpperCase() === subject.toUpperCase());
+  let cards = subject === 'all' ? flashcardsData : flashcardsData.filter(c => c.category.toUpperCase() === subject.toUpperCase());
   
-  if (filtered.length === 0) {
-    alert("Для этого предмета пока нет тестов!");
+  if (cards.length < 4) {
+    alert("Для создания теста по этому предмету нужно минимум 4 вопроса в базе!");
     return;
   }
   
-  quizQuestionsMix = shuffle([...filtered]);
+  // Dynamically generate quiz questions from flashcards
+  const generatedQuiz = cards.map(card => {
+    // Pick 3 random distractors from all flashcards to avoid having too few options in small categories
+    let others = flashcardsData.filter(c => c.answer !== card.answer);
+    others = shuffle(others).slice(0, 3);
+    
+    const options = [card.answer, ...others.map(o => o.answer)];
+    const shuffledOptions = shuffle([...options]);
+    const correctIndex = shuffledOptions.indexOf(card.answer);
+    
+    return {
+      category: card.category,
+      question: card.question,
+      options: shuffledOptions,
+      correctAnswer: correctIndex
+    };
+  });
+  
+  quizQuestionsMix = shuffle(generatedQuiz).slice(0, 10); // 10 random questions per test
   currentQuizIndex = 0;
   quizScore = 0;
   

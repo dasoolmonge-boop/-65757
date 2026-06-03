@@ -310,6 +310,9 @@ nav button.active {
   text-align: left;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: pre-wrap;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 .quiz-option:hover {
