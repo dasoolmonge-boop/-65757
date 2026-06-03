@@ -26,6 +26,30 @@ function getCategoryColor(category) {
   return 'var(--accent)';
 }
 
+function formatAnswerText(text) {
+  if (!text) return '';
+  
+  return text
+    .split('\n')
+    .map(line => {
+      line = line.trim();
+      if (!line) return '';
+      
+      // Bold term before dash or colon (max 80 chars to prevent bolding whole sentences)
+      line = line.replace(/^([^—\-\:]{2,80})([—\-\:]\s*.*)$/, '<strong>$1</strong>$2');
+      
+      if (/^\d+\./.test(line)) {
+        return `<div class="list-item number-item">${line}</div>`;
+      }
+      if (/^-/.test(line)) {
+        return `<div class="list-item bullet-item">• ${line.substring(1).trim()}</div>`;
+      }
+      
+      return `<p>${line}</p>`;
+    })
+    .join('');
+}
+
 // Elements
 const categoryNav = document.getElementById('category-nav');
 const questionsList = document.getElementById('questions-list');
@@ -150,7 +174,7 @@ function renderQuestions() {
     
     const inner = document.createElement('div');
     inner.className = 'accordion-inner';
-    inner.textContent = q.answer;
+    inner.innerHTML = formatAnswerText(q.answer);
     
     content.appendChild(inner);
     

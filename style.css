@@ -237,8 +237,30 @@ body {
   color: #e2e8f0;
   font-size: 1.05rem;
   line-height: 1.7;
-  white-space: pre-wrap;
   border-top: 1px solid transparent;
+}
+
+.accordion-inner p {
+  margin-bottom: 0.8rem;
+}
+
+.accordion-inner p:last-child {
+  margin-bottom: 0;
+}
+
+.accordion-inner strong {
+  color: var(--accent-hover);
+  font-weight: 700;
+}
+
+.accordion-inner .list-item {
+  margin-bottom: 0.5rem;
+  margin-left: 1rem;
+  position: relative;
+}
+
+.accordion-inner .bullet-item {
+  margin-left: 1.5rem;
 }
 
 .accordion-item.active .accordion-content {
