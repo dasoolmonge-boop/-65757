@@ -78,14 +78,50 @@ if (currentQuestion) {
   flashcards.push({ category: currentCategory, question: currentQuestion, answer: currentAnswer.join('\n') });
 }
 
-const existingDataJs = fs.readFileSync('data.js', 'utf8');
-const quizQuestionsMatch = existingDataJs.match(/export const quizQuestions = (\[[\s\S]*?\]);/);
-const quizQuestionsStr = quizQuestionsMatch ? quizQuestionsMatch[0] : 'export const quizQuestions = [];';
+const testText = fs.readFileSync('Тест.txt', 'utf8');
+let quizData = [];
+let qSubject = '';
+let qQuestion = '';
+let qOptions = [];
+let qAnswer = '';
 
-const subjects = [...new Set(flashcards.map(f => f.category))];
+const testLines = testText.split('\n');
+for (let i = 0; i < testLines.length; i++) {
+  let line = testLines[i].trim();
+  if (!line) continue;
+  
+  const matchedCat = getMatchedCategory(line);
+  if (matchedCat) {
+    qSubject = matchedCat;
+    continue;
+  }
+  
+  if (line.startsWith('Вопрос ')) {
+    if (qQuestion && qOptions.length > 0) {
+      quizData.push({ category: qSubject, question: qQuestion, options: qOptions, answer: qAnswer });
+    }
+    qQuestion = ''; qOptions = []; qAnswer = '';
+    
+    i++;
+    while (i < testLines.length && !testLines[i].trim().match(/^[A-D]\)/)) {
+       if (testLines[i].trim()) qQuestion += testLines[i].trim() + ' ';
+       i++;
+    }
+    qQuestion = qQuestion.trim(); i--;
+    continue;
+  }
+  
+  if (line.match(/^[A-D]\)/)) { qOptions.push(line); continue; }
+  
+  if (line.startsWith('Правильный ответ:')) {
+    qAnswer = line.split(':')[1].trim().substring(0, 1);
+    continue;
+  }
+}
+if (qQuestion && qOptions.length > 0) {
+  quizData.push({ category: qSubject, question: qQuestion, options: qOptions, answer: qAnswer });
+}
 
-const outContent = `export const flashcardsData = ${JSON.stringify(flashcards, null, 2)};\n\n${quizQuestionsStr}`;
-
+const outContent = `export const flashcardsData = ${JSON.stringify(flashcards, null, 2)};\n\nexport const quizData = ${JSON.stringify(quizData, null, 2)};\n`;
 fs.writeFileSync('data.js', outContent);
-console.log('Parsed flashcards: ', flashcards.length);
-console.log('Subjects found: ', subjects.join(', '));
+console.log('Parsed flashcards: ', flashcards.length, 'quizzes: ', quizData.length);

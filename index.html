@@ -20,7 +20,10 @@
       <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
           <h1>EduPrep</h1>
-          <p>База знаний</p>
+          <div class="mode-tabs">
+            <button id="mode-kb" class="mode-tab active">База знаний</button>
+            <button id="mode-quiz" class="mode-tab">Тесты</button>
+          </div>
         </div>
         <nav id="category-nav">
           <!-- Categories will be injected here -->
@@ -28,19 +31,52 @@
       </aside>
 
       <main class="content">
-        <div class="search-container">
-          <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          <input type="text" id="search-input" placeholder="Поиск по вопросам и ответам..." />
-        </div>
+        <!-- База Знаний -->
+        <section id="view-kb" class="view active">
+          <div class="search-container">
+            <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="search-input" placeholder="Поиск по вопросам и ответам..." />
+          </div>
 
-        <div class="questions-header">
-          <h2 id="current-category-title">Все предметы</h2>
-          <span id="questions-count">0 вопросов</span>
-        </div>
+          <div class="questions-header">
+            <h2 id="current-category-title">Все предметы</h2>
+            <span id="questions-count">0 вопросов</span>
+          </div>
 
-        <div class="questions-list" id="questions-list">
-          <!-- Accordion items will be injected here -->
-        </div>
+          <div class="questions-list" id="questions-list">
+            <!-- Accordion items will be injected here -->
+          </div>
+        </section>
+
+        <!-- Тесты -->
+        <section id="view-quiz" class="view hidden">
+          <div id="quiz-setup" class="quiz-container">
+            <h2>Тестирование</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Выберите предмет в левом меню (или оставьте "Все предметы") и нажмите кнопку ниже, чтобы начать.</p>
+            <button id="start-quiz-btn" class="primary-btn">Начать тест</button>
+          </div>
+          
+          <div id="quiz-active" class="hidden">
+            <div class="controls">
+              <span id="quiz-counter" class="counter">Вопрос 1 / 10</span>
+              <span id="quiz-score" class="score">Очки: 0</span>
+            </div>
+            <div class="quiz-question-container">
+              <div class="quiz-category" id="quiz-category">Категория</div>
+              <h3 class="quiz-question" id="quiz-question">Вопрос?</h3>
+              <div class="quiz-options" id="quiz-options">
+                <!-- Options injected here -->
+              </div>
+            </div>
+            <button id="next-quiz-btn" class="primary-btn hidden" style="margin-top: 1.5rem; width: 100%;">Следующий вопрос</button>
+          </div>
+
+          <div id="quiz-result" class="quiz-container hidden">
+            <h2>Результаты теста</h2>
+            <p class="final-score" id="final-score">Вы набрали 8 из 10</p>
+            <button id="restart-quiz-btn" class="primary-btn">Пройти снова</button>
+          </div>
+        </section>
       </main>
     </div>
     <script type="module" src="/main.js"></script>
